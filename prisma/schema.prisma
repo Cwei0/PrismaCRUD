@@ -1,0 +1,46 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String     @id @default(cuid())
+  firstName String
+  lastName  String
+  car       Car?
+  carBlogs  CarBlogs[]
+  friendId  String?    @unique
+  friend    User?      @relation("Friend", fields: [friendId], references: [id])
+  friendOf  User?      @relation("Friend")
+}
+
+model Car {
+  id     String  @id @default(cuid())
+  color  String
+  name   String
+  bought Boolean @default(false)
+  userId String  @unique
+  user   User    @relation(fields: [userId], references: [id])
+}
+
+model CarBlogs {
+  id         String             @id @default(cuid())
+  content    String
+  createdAt  DateTime           @default(now())
+  userId     String
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categories CategoryCarBlogs[]
+}
+
+model CategoryCarBlogs {
+  id      String     @id @default(cuid())
+  name    String
+  carBlog CarBlogs[]
+}
